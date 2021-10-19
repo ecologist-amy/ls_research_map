@@ -1,0 +1,33 @@
+---
+title: "map2.0"
+author: "AMH"
+date: "10/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load libraries, set working directory, and import data
+```{r}
+library(tidyverse)
+library(devtools)
+library(maps)
+library(maptools)
+library(scatterpie)
+library(ggmap)
+
+setwd("~/Land_Sea_linkages/GlobalHotspots")
+
+htspts <- read.csv("GlobalHotspots_allterms_19Oct2021.csv")
+
+```
+
+
+Clean/prepare data
+```{r}
+
+htspts2 <- htspts %>%
+  select
+```
