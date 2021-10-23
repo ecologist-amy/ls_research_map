@@ -7,9 +7,12 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/hrusk/OneDrive/Documents/Land_Sea_linkages/GlobalHotspots")
+setwd("~/Land_Sea_linkages/GlobalHotspots")
+getwd()
 ```
 
-Load libraries, set working directory, and import data
+Load libraries and import data
 ```{r}
 library(tidyverse)
 library(devtools)
@@ -18,7 +21,6 @@ library(maptools)
 library(scatterpie)
 library(ggmap)
 
-setwd("~/Land_Sea_linkages/GlobalHotspots")
 
 htspts <- read.csv("GlobalHotspots_allterms_19Oct2021.csv")
 
@@ -27,7 +29,65 @@ htspts <- read.csv("GlobalHotspots_allterms_19Oct2021.csv")
 
 Clean/prepare data
 ```{r}
-
+##remove excess citation information##
 htspts2 <- htspts %>%
-  select
+  select(Search_Term, Title, Location, Linkage, Terrestiral, Freshwater, Marine, Biotic_Abiotic, global_change_y.n, Global_Change, observational, empirical, modelling, review)
+
+##add long, lat columns##
+htspts2 %>%
+  mutate(long = 
+           case_when(Location == "North America" ~ "-105.292874",
+                     Location == "Europe" ~ "48.380558,14.894560", 
+                     Location == "South America" ~ "-58.688401",
+                     Location == "Europe" ~ "17.519120", 
+                     Location == "Asia" ~ "103.556080", 
+                     Location == "Indo-Pacific" ~ "148.701914", 
+                     Location == "Africa" ~ "23.020810", 
+                     Location == "Arctic" ~ "14.894560", 
+                     Location == "Antarctic" ~ "-10.298374", 
+                     Location == "Global" ~ "-133.684516"
+                     ))
+         
+htspts2 %>%
+  mutate(lat = 
+           case_when(Location == "North America" ~ "48.729626",
+                     Location == "Europe" ~ "48.458352", 
+                     Location == "South America" ~ "-16.355278",
+                     Location == "Europe" ~ "48.380558", 
+                     Location == "Mediterranean" ~ "", 
+                     Location == "Asia" ~ "55.842422", 
+                     Location == "Indo-Pacific" ~ "3.981107", 
+                     Location == "Africa" ~ "9.102097", 
+                     Location == "Arctic" ~ "48.380558", 
+                     Location == "Antarctic" ~ "-73.158953,-10.29837", 
+                     Location == "Global" ~ "-60.006303"
+                     ))
+         
+         
+## remove non-target data studies ##
+htspts3 <- htspts2 %>%
+  filter(Linkage == "direct")
+
+## create data for pie charts ##
+htspts4 <- htspts3 %>%
+  group_by(Location) %>%
+  summarise(count = count(Biotic_Abiotic), n = n())
+
+
+
+```
+
+Create world map with pies on the map
+```{r}
+##playing with buildng world map##
+mapWorld <- borders("world", colour="gray50", fill="gray50") # create a layer of borders
+mp <- ggplot() +   mapWorld
+
+##buidling with scatterplots##
+world <- map_data('world')
+mp2 <- ggplot(world, aes(long, lat)) +
+  geom_map(map = world, aes(map_id = region), fill = NA, color = "black") +
+  coord_quickmap()
+
+
 ```
