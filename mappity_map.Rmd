@@ -14,6 +14,11 @@ getwd()
 
 Load libraries and import data
 ```{r}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/hrusk/OneDrive/Documents/Land_Sea_linkages/GlobalHotspots")
+setwd("~/Land_Sea_linkages/GlobalHotspots")
+getwd()
+
 library(tidyverse)
 library(devtools)
 library(maps)
@@ -22,7 +27,8 @@ library(scatterpie)
 library(ggmap)
 
 
-htspts <- read.csv("GlobalHotspots_allterms_19Oct2021.csv")
+
+htspts <- read.csv("GlobalHotspots_allterms_01Nov2021.csv")
 
 ```
 
@@ -33,11 +39,25 @@ Clean/prepare data
 htspts2 <- htspts %>%
   select(Search_Term, Title, Location, Linkage, Terrestiral, Freshwater, Marine, Biotic_Abiotic, global_change_y.n, Global_Change, observational, empirical, modelling, review)
 
+htspts2[htspts2 == "Euope"] <- "Europe"
+htspts2[htspts2 == "Atlantic"] <- "North America"
+htspts2[htspts2 == "Indonesia"] <- "Asia"
+htspts2[htspts2 == "Antarctica"] <- "Antarctic"
+htspts2[htspts2 == "China"] <- "Asia"
+htspts2[htspts2 == "Russia"] <- "Asia"
+htspts2[htspts2 == "South Asia"] <- "Asia"
+htspts2[htspts2 == "East Asia"] <- "Asia"
+htspts2[htspts2 == "Slovenia"] <- "Europe"
+htspts2[htspts2 == "North Africa"] <- "Africa"
+htspts2[htspts2 == "South Africa"] <- "Africa"
+htspts2[htspts2 == "Aegean Sea"] <- "Europe"
+htspts2[htspts2 == "Australia"] <- "Indo-Pacific"
+
 ##add long, lat columns##
-htspts2 %>%
+htspts2 <- htspts2 %>%
   mutate(long = 
            case_when(Location == "North America" ~ "-105.292874",
-                     Location == "Europe" ~ "48.380558,14.894560", 
+                     Location == "Europe" ~ "14.894560", 
                      Location == "South America" ~ "-58.688401",
                      Location == "Europe" ~ "17.519120", 
                      Location == "Asia" ~ "103.556080", 
@@ -45,10 +65,10 @@ htspts2 %>%
                      Location == "Africa" ~ "23.020810", 
                      Location == "Arctic" ~ "14.894560", 
                      Location == "Antarctic" ~ "-10.298374", 
-                     Location == "Global" ~ "-133.684516"
+                     Location == "Global" ~ "160.684516"
                      ))
          
-htspts2 %>%
+htspts2 <- htspts2 %>%
   mutate(lat = 
            case_when(Location == "North America" ~ "48.729626",
                      Location == "Europe" ~ "48.458352", 
@@ -59,8 +79,8 @@ htspts2 %>%
                      Location == "Indo-Pacific" ~ "3.981107", 
                      Location == "Africa" ~ "9.102097", 
                      Location == "Arctic" ~ "48.380558", 
-                     Location == "Antarctic" ~ "-73.158953,-10.29837", 
-                     Location == "Global" ~ "-60.006303"
+                     Location == "Antarctic" ~ "-73.158953", 
+                     Location == "Global" ~ "100.006303"
                      ))
          
          
@@ -68,26 +88,127 @@ htspts2 %>%
 htspts3 <- htspts2 %>%
   filter(Linkage == "direct")
 
-## create data for pie charts ##
-htspts4 <- htspts3 %>%
-  group_by(Location) %>%
-  summarise(count = count(Biotic_Abiotic), n = n())
+## create data for linkages pie charts ##
+
+link <- htspts2 %>%
+  group_by(Location, lat, long) %>%
+  count(Linkage) %>%
+  filter(Linkage == "direct"| Linkage == "indirect")
+  ungroup()
+
+link1 <- na.omit(link)
+
+link2 <- dcast(link1, Location + lat + long ~ Linkage)
+link2[is.na(link2)] <- 0
+link2$lat <- as.numeric(link2$lat)
+link2$long <- as.numeric(link2$long)
+link2$total <- link2$direct + link2$indirect
+
+link2 <- link2 %>%
+  mutate(radius = case_when(between(total, 0, 14) ~ 6, 
+                            between(total, 15, 28) ~ 12,
+                            between(total, 29, 42) ~ 18))
+
+link2 <- link2 %>%
+  mutate(groups = case_when(between(total, 0, 14) ~ "<14", 
+                            between(total, 15, 28) ~ "15-28",
+                            between(total, 29, 42) ~ ">29"))
 
 
+## create data for biotic, abiotic, both pie charts ##
+
+ba <- htspts3 %>%
+  group_by(Location, lat, long) %>%
+  count(Biotic_Abiotic) %>%
+  ungroup()
+
+ba2 <- dcast(ba, Location + lat + long ~ Biotic_Abiotic)
+ba2[is.na(ba2)] <- 0
+ba2$lat <- as.numeric(ba2$lat)
+ba2$long <- as.numeric(ba2$long)
+ba2$total <- ba2$biotic + ba2$abiotic + ba2$both
+
+ba2 <- ba2 %>%
+  mutate(radius = case_when(between(total, 0, 14) ~ 6, 
+                            between(total, 15, 28) ~ 12,
+                            between(total, 29, 42) ~ 18))
+
+ba2 <- ba2 %>%
+  mutate(groups = case_when(between(total, 0, 14) ~ "<14", 
+                            between(total, 15, 28) ~ "15-28",
+                            between(total, 29, 42) ~ ">29"))
+
+## manipulate data for terrestrial, freshwater, marine ##
+
+ecosystem <- htspts3 %>%
+  group_by(Location, lat, long) %>%
+  count(Terrestiral, Freshwater, Marine) %>%
+  unite("connection", Terrestiral:Marine, sep = "-") %>%
+  ungroup()
+
+ecosystem[ecosystem == "y-y-y"] <- "all"
+ecosystem[ecosystem == "n-y-y"] <- "fre_mar"
+ecosystem[ecosystem == "y-y-n"] <- "ter_fre"
+ecosystem[ecosystem == "y-n-y"] <- "ter_mar"
+ecosystem[ecosystem == "n-y-y"] <- "fre_mar"
+
+eco2 <- dcast(ecosystem, Location + lat + long ~ connection)
+eco2[is.na(eco2)] <- 0
+eco2$lat <- as.numeric(eco2$lat)
+eco2$long <- as.numeric(eco2$long)
+eco2$total <- eco2$all + eco2$fre_mar + eco2$ter_fre + eco2$ter_mar + eco2$fre_mar
+
+eco2 <- eco2 %>%
+  mutate(radius = case_when(between(total, 0, 14) ~ 6, 
+                            between(total, 15, 28) ~ 12,
+                            between(total, 29, 42) ~ 18))
+
+eco2 <- eco2 %>%
+  mutate(groups = case_when(between(total, 0, 14) ~ "<14", 
+                            between(total, 15, 28) ~ "15-28",
+                            between(total, 29, 42) ~ ">29"))
 
 ```
 
-Create world map with pies on the map
+Create world map 
 ```{r}
-##playing with buildng world map##
+
 mapWorld <- borders("world", colour="gray50", fill="gray50") # create a layer of borders
 mp <- ggplot() +   mapWorld
 
-##buidling with scatterplots##
 world <- map_data('world')
 mp2 <- ggplot(world, aes(long, lat)) +
-  geom_map(map = world, aes(map_id = region), fill = NA, color = "black") +
+  geom_map(map = world, aes(map_id = region), fill = "gray", color = "white") +
   coord_quickmap()
 
 
 ```
+
+world map with Flow Pies charted on top
+```{r}
+world <- map_data('world')
+mp2 <- ggplot(world, aes(long, lat)) +
+  geom_map(map = world, aes(map_id = region), fill = "gray", color = "white") +
+  coord_quickmap()
+
+mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba2, cols = c("abiotic", "biotic", "both")) +
+    theme(legend.position = "bottom") +
+  scale_fill_discrete(name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
+  geom_scatterpie_legend(ba2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+```
+world map of direct and indirect linkages
+```{r}
+mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = link2, cols = c("direct", "indirect")) +
+    theme(legend.position = "bottom") +
+  scale_fill_discrete(name = "Linkage", labels = c("Direct", "Indirect")) +
+ geom_scatterpie_legend(link2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+
+```
+Ecosystem Linkage
+```{r}
+mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = eco2, cols = c("ter_fre", "fre_mar", "ter_mar", "all")) +
+    theme(legend.position = "bottom") +
+  scale_fill_discrete(name = "Ecosystem Connection", labels = c("Terrestrial-Freshwater", "Freshwater-Marine", "Terrestrial-Marine", "All")) +
+  geom_scatterpie_legend(eco2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+```
+
