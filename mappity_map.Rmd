@@ -74,7 +74,6 @@ htspts2 <- htspts2 %>%
                      Location == "Europe" ~ "48.458352", 
                      Location == "South America" ~ "-16.355278",
                      Location == "Europe" ~ "48.380558", 
-                     Location == "Mediterranean" ~ "", 
                      Location == "Asia" ~ "55.842422", 
                      Location == "Indo-Pacific" ~ "3.981107", 
                      Location == "Africa" ~ "9.102097", 
@@ -168,6 +167,23 @@ eco2 <- eco2 %>%
                             between(total, 15, 28) ~ "15-28",
                             between(total, 29, 42) ~ ">29"))
 
+## search terms ##
+term <- htspts3 %>%
+  group_by(Location, lat, long) %>%
+  count(Search_Term) %>%
+  ungroup()
+
+term2 <- dcast(term, Location + lat + long ~ Search_Term)
+term2[is.na(term2)] <- 0
+term2$lat <- as.numeric(term2$lat)
+term2$long <- as.numeric(term2$long)
+term2$total <- term2$`cross-ecosystem` + term2$land_to_sea_connections + term2$`ridge-to-reef`
+
+term2 <- term2 %>%
+  mutate(radius = case_when(between(total, 0, 14) ~ 6, 
+                            between(total, 15, 28) ~ 12,
+                            between(total, 29, 42) ~ 18))
+
 ```
 
 Create world map 
@@ -192,23 +208,71 @@ mp2 <- ggplot(world, aes(long, lat)) +
   coord_quickmap()
 
 mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba2, cols = c("abiotic", "biotic", "both")) +
-    theme(legend.position = "bottom") +
-  scale_fill_discrete(name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
+  annotate("text", x= -105, y = 73, size = 3, label = "North America", fontface = "bold") +
+  annotate("text", x= 15.5, y = 66, size = 3, label = "Europe", fontface = "bold") +
+  annotate("text", x= -57, y = -5, size = 3, label = "South America", fontface = "bold") +
+  annotate("text", x= 104, y = 67, size = 3, label = "Asia", fontface = "bold") +
+  annotate("text", x= 153, y = 21, size = 3, label = "Indo-Pacific", fontface = "bold") +
+  annotate("text", x= 23, y = 20, size = 3, label = "Africa", fontface = "bold") +
+  annotate("text", x= -10, y = -62, size = 3, label = "Antarctica", fontface = "bold") +
+  annotate("text", x= 162, y = 124, size = 3, label = "Global", fontface = "bold") +
+  scale_fill_manual(values = c("#2c7fb8", "#7fcdbb", "#edf8b1"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
+  theme(legend.position = "bottom", legend.box = "horizontal") +
+  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
   geom_scatterpie_legend(ba2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
 ```
 world map of direct and indirect linkages
 ```{r}
 mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = link2, cols = c("direct", "indirect")) +
     theme(legend.position = "bottom") +
-  scale_fill_discrete(name = "Linkage", labels = c("Direct", "Indirect")) +
+  annotate("text", x= -105, y = 73, size = 3, label = "North America", fontface = "bold") +
+  annotate("text", x= 15.5, y = 66, size = 3, label = "Europe", fontface = "bold") +
+  annotate("text", x= -57, y = -5, size = 3, label = "South America", fontface = "bold") +
+  annotate("text", x= 104, y = 67, size = 3, label = "Asia", fontface = "bold") +
+  annotate("text", x= 153, y = 21, size = 3, label = "Indo-Pacific", fontface = "bold") +
+  annotate("text", x= 23, y = 20, size = 3, label = "Africa", fontface = "bold") +
+  annotate("text", x= -10, y = -62, size = 3, label = "Antarctica", fontface = "bold") +
+  annotate("text", x= 161, y = 124, size = 3, label = "Global", fontface = "bold") +
+  scale_fill_manual(values = c("#2c7fb8", "#edf8b1"),name = "Linkage", labels = c("Direct", "Indirect")) +
+  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
  geom_scatterpie_legend(link2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
 
 ```
-Ecosystem Linkage
+world map of ecosystem connections of direct linkage studies
 ```{r}
 mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = eco2, cols = c("ter_fre", "fre_mar", "ter_mar", "all")) +
-    theme(legend.position = "bottom") +
-  scale_fill_discrete(name = "Ecosystem Connection", labels = c("Terrestrial-Freshwater", "Freshwater-Marine", "Terrestrial-Marine", "All")) +
+  annotate("text", x= -105, y = 73, size = 3, label = "North America", fontface = "bold") +
+  annotate("text", x= 15.5, y = 66, size = 3, label = "Europe", fontface = "bold") +
+  annotate("text", x= -57, y = -5, size = 3, label = "South America", fontface = "bold") +
+  annotate("text", x= 104, y = 67, size = 3, label = "Asia", fontface = "bold") +
+  annotate("text", x= 153, y = 21, size = 3, label = "Indo-Pacific", fontface = "bold") +
+  annotate("text", x= 23, y = 20, size = 3, label = "Africa", fontface = "bold") +
+  annotate("text", x= -10, y = -62, size = 3, label = "Antarctica", fontface = "bold") +
+  annotate("text", x= 161, y = 118, size = 3, label = "Global", fontface = "bold") +
+  scale_fill_manual(values = c("#2c7fb8", "#7fcdbb", "#edf8b1"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
+  theme(legend.position = "bottom", legend.box = "horizontal") +
+  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
+  scale_fill_manual(values = c("#225ea8", "#41b6c4", "#a1dab4", "#ffffcc"), name = "Ecosystem Connection", labels = c("Terrestrial-Freshwater", "Freshwater-Marine", "Terrestrial-Marine", "All")) +
   geom_scatterpie_legend(eco2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+```
+world map of search terms with direct linkages
+```{r}
+mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = term2, cols = c("cross-ecosystem", "land_to_sea_connections", "ridge-to-reef")) +
+  annotate("text", x= -105, y = 73, size = 3, label = "North America", fontface = "bold") +
+  annotate("text", x= 15.5, y = 60, size = 3, label = "Europe", fontface = "bold") +
+  annotate("text", x= -57, y = -5, size = 3, label = "South America", fontface = "bold") +
+  annotate("text", x= 104, y = 67, size = 3, label = "Asia", fontface = "bold") +
+  annotate("text", x= 153, y = 21, size = 3, label = "Indo-Pacific", fontface = "bold") +
+  annotate("text", x= 23, y = 20, size = 3, label = "Africa", fontface = "bold") +
+  annotate("text", x= -10, y = -62, size = 3, label = "Antarctica", fontface = "bold") +
+  annotate("text", x= 161, y = 118, size = 3, label = "Global", fontface = "bold") +
+  theme(legend.position = "bottom", legend.box = "horizontal") +
+  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
+  scale_fill_manual(values = c("#2c7fb8", "#7fcdbb", "#edf8b1"), name = "Search Term", labels = c("cross ecosystem", "land to sea connections", "ridge-to-reef")) +
+  geom_scatterpie_legend(term2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+```
+global change map
+```{r}
+
 ```
 
