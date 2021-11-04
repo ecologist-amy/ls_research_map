@@ -220,6 +220,9 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba2, cols = c("ab
   theme(legend.position = "bottom", legend.box = "horizontal") +
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
   geom_scatterpie_legend(ba2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+
+ggsave(file = "biotic_abiotic.png", dpi = 700)
+
 ```
 world map of direct and indirect linkages
 ```{r}
@@ -236,6 +239,8 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = link2, cols = c("
   scale_fill_manual(values = c("#2c7fb8", "#edf8b1"),name = "Linkage", labels = c("Direct", "Indirect")) +
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
  geom_scatterpie_legend(link2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+
+ggsave(file = "linkages.png", dpi = 700)
 
 ```
 world map of ecosystem connections of direct linkage studies
@@ -254,6 +259,8 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = eco2, cols = c("t
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
   scale_fill_manual(values = c("#225ea8", "#41b6c4", "#a1dab4", "#ffffcc"), name = "Ecosystem Connection", labels = c("Terrestrial-Freshwater", "Freshwater-Marine", "Terrestrial-Marine", "All")) +
   geom_scatterpie_legend(eco2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+
+ggsave(file = "ecosystem_connection.png", dpi = 700)
 ```
 world map of search terms with direct linkages
 ```{r}
@@ -270,6 +277,8 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = term2, cols = c("
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
   scale_fill_manual(values = c("#2c7fb8", "#7fcdbb", "#edf8b1"), name = "Search Term", labels = c("cross ecosystem", "land to sea connections", "ridge-to-reef")) +
   geom_scatterpie_legend(term2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+
+ggsave("search_terms.png", dpi = 700)
 ```
 global change map
 ```{r}
