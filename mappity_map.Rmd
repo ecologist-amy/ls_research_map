@@ -25,6 +25,7 @@ library(maps)
 library(maptools)
 library(scatterpie)
 library(ggmap)
+library(reshape2)
 
 
 
@@ -93,7 +94,7 @@ link <- htspts2 %>%
   group_by(Location, lat, long) %>%
   count(Linkage) %>%
   filter(Linkage == "direct"| Linkage == "indirect")
-  ungroup()
+
 
 link1 <- na.omit(link)
 
