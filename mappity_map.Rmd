@@ -218,6 +218,7 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba2, cols = c("ab
   annotate("text", x= -10, y = -62, size = 3, label = "Antarctica", fontface = "bold") +
   annotate("text", x= 162, y = 124, size = 3, label = "Global", fontface = "bold") +
   annotate("text", x = -130, y = -20, size = 3.5, label = "Number of Articles") +
+  annotate("text", x = -155, y = 125, size = 4, label = "A)", fontface = "bold") +
   scale_fill_manual(values = c("#d01c8b", "#4dac26", "#f7f7f7"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
   theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), legend.position = "bottom", legend.box = "horizontal") +
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
@@ -240,7 +241,7 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = link2, cols = c("
   annotate("text", x= -10, y = -62, size = 3, label = "Antarctica", fontface = "bold") +
   annotate("text", x= 161, y = 124, size = 3, label = "Global", fontface = "bold") +
   annotate("text", x = -130, y = -20, size = 3.5, label = "Number of Articles") +
-  scale_fill_manual(values = c("#2c7fb8", "#edf8b1"),name = "Linkage", labels = c("Direct", "Indirect")) +
+    scale_fill_manual(values = c("#2c7fb8", "#edf8b1"),name = "Linkage", labels = c("Direct", "Indirect")) +
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
  geom_scatterpie_legend(link2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
 
@@ -262,6 +263,7 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = eco2, cols = c("t
   annotate("text", x= -10, y = -62, size = 3, label = "Antarctica", fontface = "bold") +
   annotate("text", x= 161, y = 118, size = 3, label = "Global", fontface = "bold") +
   annotate("text", x = -130, y = -20, size = 3.5, label = "Number of Articles") +
+  annotate("text", x = -155, y = 125, size = 4, label = "B)", fontface = "bold") +
   scale_fill_manual(values = c("#2c7fb8", "#7fcdbb", "#edf8b1"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
   theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), legend.position = "bottom", legend.box = "horizontal") +
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
