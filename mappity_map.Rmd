@@ -14,10 +14,6 @@ getwd()
 
 Load libraries and import data
 ```{r}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = "C:/Users/hrusk/OneDrive/Documents/Land_Sea_linkages/GlobalHotspots")
-setwd("~/Land_Sea_linkages/GlobalHotspots")
-getwd()
 
 library(tidyverse)
 library(devtools)
@@ -52,7 +48,7 @@ htspts2[htspts2 == "Slovenia"] <- "Europe"
 htspts2[htspts2 == "North Africa"] <- "Africa"
 htspts2[htspts2 == "South Africa"] <- "Africa"
 htspts2[htspts2 == "Aegean Sea"] <- "Europe"
-htspts2[htspts2 == "Australia"] <- "Indo-Pacific"
+htspts2[htspts2 == "Australia"] <- "Australia"
 
 ##add long, lat columns##
 htspts2 <- htspts2 %>%
@@ -138,6 +134,12 @@ ba2 <- ba2 %>%
                             between(total, 15, 28) ~ "15-28",
                             between(total, 29, 42) ~ ">29"))
 
+ba3 <- ba2 %>% 
+  add_row(Location = "Global Trends", lat = "108.00000", long = "15", abiotic = 68, biotic = 21, both = 13, total = 102, radius = 22, groups = ">29", )
+
+ba3$lat <- as.double(ba3$lat)
+ba3$long <- as.double(ba3$long)
+
 ## manipulate data for terrestrial, freshwater, marine ##
 
 ecosystem <- htspts3 %>%
@@ -208,22 +210,23 @@ mp2 <- ggplot(world, aes(long, lat)) +
   geom_map(map = world, aes(map_id = region), fill = "gray", color = "white") +
   coord_quickmap()
 
-mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba2, cols = c("abiotic", "biotic", "both")) +
+mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba3, cols = c("abiotic", "biotic", "both")) +
   annotate("text", x= -105, y = 73, size = 3, label = "North America", fontface = "bold") +
-  annotate("text", x= 15.5, y = 66, size = 3, label = "Europe", fontface = "bold") +
+  annotate("text", x= 15.5, y = 60, size = 3, label = "Europe", fontface = "bold") +
   annotate("text", x= -57, y = -5, size = 3, label = "South America", fontface = "bold") +
   annotate("text", x= 104, y = 67, size = 3, label = "Asia", fontface = "bold") +
   annotate("text", x= 153, y = 21, size = 3, label = "Indo-Pacific", fontface = "bold") +
   annotate("text", x= 23, y = 20, size = 3, label = "Africa", fontface = "bold") +
   annotate("text", x= -10, y = -62, size = 3, label = "Antarctica", fontface = "bold") +
-  annotate("text", x= 162, y = 124, size = 3, label = "Global", fontface = "bold") +
+  annotate("text", x= 162, y = 120, size = 3, label = "Cross-continent", fontface = "bold") +
+  annotate("text", x= 14, y = 138, size = 3, label = "Global Trends", fontface = "bold") +
   annotate("text", x = -130, y = -20, size = 3.5, label = "Number of Articles") +
   annotate("text", x = -155, y = 125, size = 4, label = "A)", fontface = "bold") +
   scale_fill_manual(values = c("#d01c8b", "#4dac26", "#f7f7f7"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
   theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), legend.position = "bottom", legend.box = "horizontal") +
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
-  geom_scatterpie_legend(ba2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28")) +
-  annotate("rect", xmin=142, xmax = 180, ymin = 85, ymax = 130, alpha = 0.2, color = "black", fill = NA)
+  geom_scatterpie_legend(ba2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28")) + 
+  annotate("rect", xmin= -23, xmax = 50, ymin = 83, ymax = 145, alpha = 0.2, color = "black", fill = NA)
 
 ggsave(file = "biotic_abiotic.png", dpi = 700)
 
