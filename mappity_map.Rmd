@@ -25,7 +25,7 @@ library(reshape2)
 
 
 
-htspts <- read.csv("GlobalHotspots_allterms_01Nov2021.csv")
+htspts <- read.csv("GlobalHotspots_allterms_18May2022.csv")
 
 ```
 
@@ -33,8 +33,17 @@ htspts <- read.csv("GlobalHotspots_allterms_01Nov2021.csv")
 Clean/prepare data
 ```{r}
 ##remove excess citation information##
+htspts <- htspts %>%
+  mutate(imp.factor =
+           case_when (Source.Title == "ECOLOGICAL MONOGRAPHS" ~ ,
+                      Souce.Title == "ECOLOGY LETTERS" ~ ,
+                      Source.Title == "PROCEEDINGS OF THE ROYAL SOCIETY B-BIOLOGICAL SCIENCES" ~ , 
+                      Source.Title == "AQUATIC MICROBIAL ECOLOGY" ~ ,
+                      Source.Title == "HYDROBIOLOGIA" ~ ,
+                      Source.Title == "CONSERVATION BIOLOGY ~ ,"))
+
 htspts2 <- htspts %>%
-  select(Search_Term, Title, Location, Linkage, Terrestiral, Freshwater, Marine, Biotic_Abiotic, global_change_y.n, Global_Change, observational, empirical, modelling, review)
+  select(Search_Term, Title, Publication.Year, Location, Linkage, Terrestiral, Freshwater, Marine, Biotic_Abiotic, flows, global_change_y.n, Global_Change, observational, empirical, modelling, review)
 
 htspts2[htspts2 == "Euope"] <- "Europe"
 htspts2[htspts2 == "Atlantic"] <- "North America"
@@ -138,7 +147,7 @@ ba2$lat <- as.character(ba2$lat)
 ba2$long <- as.character(ba2$long)
 
 ba3 <- ba2 %>% 
-  add_row(Location = "Global Trends", lat = "120.00000", long = "15", abiotic = 68, biotic = 21, both = 13, total = 102, radius = 22, groups = ">29", )
+  add_row(Location = "Global Trends", lat = "120.00000", long = "15", abiotic = 38, biotic = 38, both = 16, total = 92, radius = 22, groups = ">29", )
 
 ba3$lat <- as.double(ba3$lat)
 ba3$long <- as.double(ba3$long)
@@ -177,7 +186,7 @@ eco2$lat <- as.character (eco2$lat)
 eco2$long <- as.character(eco2$long)
 
 eco3 <- eco2 %>%
-  add_row(Location = "Global Trends", lat = "108.00000", long = "15", all = 40, fre_mar = 10, ter_fre = 38, ter_mar = 14, total = 102, radius = 22, groups = ">29", )
+  add_row(Location = "Global Trends", lat = "108.00000", long = "15", all = 33, fre_mar = 9, ter_fre = 38, ter_mar = 12, total = 92, radius = 22, groups = ">29", )
 
 
 eco3$lat <- as.double(eco3$lat)
