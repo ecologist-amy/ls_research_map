@@ -22,7 +22,8 @@ library(maptools)
 library(scatterpie)
 library(ggmap)
 library(reshape2)
-
+library(gridExtra)
+library(ggpubr)
 
 
 htspts <- read.csv("GlobalHotspots_allterms_18May2022.csv")
@@ -195,7 +196,7 @@ htspts2 <- htspts2 %>%
                      Location == "Africa" ~ "23.020810", 
                      Location == "Arctic" ~ "14.894560", 
                      Location == "Antarctic" ~ "-10.298374", 
-                     Location == "Global" ~ "160.684516"
+                     Location == "Global" ~ "14.684516"
                      ))
          
 htspts2 <- htspts2 %>%
@@ -209,7 +210,7 @@ htspts2 <- htspts2 %>%
                      Location == "Africa" ~ "9.102097", 
                      Location == "Arctic" ~ "48.380558", 
                      Location == "Antarctic" ~ "-73.158953", 
-                     Location == "Global" ~ "100.006303"
+                     Location == "Global" ~ "105.006303"
                      ))
          
          
@@ -352,12 +353,35 @@ mp2 <- ggplot(world, aes(long, lat)) +
 
 world map with Flow Pies charted on top
 ```{r}
+setwd("C:/Users/hrusk/OneDrive/Documents/Land_Sea_linkages/GlobalHotspots")
+
+ba4 <- ba3 %>%
+  filter(Location != "Global Trends")
+
+#####global trends pichart#####
+
+#create data frame#
+Trends1 <- data.frame(
+          group = c("abiotic", "biotic", "both"), 
+          value = c(.413, .413, .174))
+          
+
+#create pie chart#
+flows1 <- ggplot(Trends1, aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1, color = "black") +
+  geom_text(aes(label = c(38, 38, 16)), position = position_stack(vjust = 0.5)) +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = c("#d01c8b", "#4dac26", "#f7f7f7"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
+  theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "none")+
+  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5))
+ 
+#map of continent trends#
 world <- map_data('world')
 mp2 <- ggplot(world, aes(long, lat)) +
   geom_map(map = world, aes(map_id = region), fill = "gray", color = "white") +
   coord_quickmap()
 
-mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba3, cols = c("abiotic", "biotic", "both")) +
+flows2 <- mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba4, cols = c("abiotic", "biotic", "both")) +
   annotate("text", x= -103, y = 74, size = 3.5, label = "North America", fontface = "bold") +
   annotate("text", x= 15.5, y = 63, size = 3.5, label = "Europe", fontface = "bold") +
   annotate("text", x= -58, y = -5, size = 3.5, label = "South America", fontface = "bold") +
@@ -365,19 +389,98 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba3, cols = c("ab
   annotate("text", x= 152, y = 23, size = 3.5, label = "Indo-Pacific", fontface = "bold") +
   annotate("text", x= 20, y = 23, size = 3.5, label = "Africa", fontface = "bold") +
   annotate("text", x= -10, y = -60, size = 3.5, label = "Antarctica", fontface = "bold") +
-  annotate("text", x= 160, y = 125, size = 3.5, label = "Cross-continent", fontface = "bold") +
-  annotate("text", x= 16, y = 150, size = 3.5, label = "Global Trends", fontface = "bold") +
+  annotate("text", x= 15, y = 125, size = 3.5, label = "Cross-continent", fontface = "bold") +
   annotate("text", x = -140, y = -18, size = 3.5, label = "Number of Articles") +
-  annotate("text", x = -170, y = 140, size = 4, label = "A)", fontface = "bold") +
   scale_fill_manual(values = c("#d01c8b", "#4dac26", "#f7f7f7"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
-  theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "bottom", legend.box = "horizontal") +
+  theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "none", legend.box = "horizontal") +
   guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
-  geom_scatterpie_legend(ba3$radius, x = -160, y = -53, n = 3, labeller = function(a) a = c("<14", "15-28", ">28")) + 
-  annotate("rect", xmin= -35, xmax = 65, ymin = 94, ymax = 158, alpha = 0.2, color = "black", fill = NA)
+  geom_scatterpie_legend(ba3$radius, x = -160, y = -53, n = 3, labeller = function(a) a = c("<14", "15-28", ">28")) 
+  
 
-ggsave(file = "biotic_abiotic.png", width = 7, height = 4.5, units = "in", dpi = 800)
+fig1 <- ggarrange(flows2, flows1, ncol = 2, labels = "A", widths = c(5,1.25), heights = c(3,2), common.legend = TRUE, legend = "bottom")
+
+annotate_figure(fig1,
+               top = text_grob("Global Trends", face = "bold", size = 10, hjust = -2.5, vjust = 13))
+
+setwd("~/Land_Sea_linkages/GlobalHotspots")
+ggsave(file = "biotic_abiotic2.png", width = 7, height = 4.5, units = "in", dpi = 800)
+
+#annotate("text", x = -170, y = 140, size = 4, label = "A)", fontface = "bold") +
+  #annotate("text", x = 170, y = 140, size = 4, label = "B)", fontface = "bold") +
 
 ```
+
+
+world map of ecosystem connections of direct linkage studies
+```{r}
+setwd("C:/Users/hrusk/OneDrive/Documents/Land_Sea_linkages/GlobalHotspots")
+
+eco4 <- eco3 %>%
+  filter(Location != "Global Trends")
+
+#####global trends pichart#####
+
+#create data frame#
+Trends2 <- data.frame(
+          group = c("ter_fre", "fre_mar", "ter_mar", "all"), 
+          value = c(38, 9, 12, 33))
+          
+
+#create pie chart#
+ecos1 <- ggplot(Trends2, aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1, color = "black") +
+  geom_text(aes(label = value), position = position_stack(vjust = 0.5)) +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = c("#225ea8", "#41b6c4", "#a1dab4", "#ffffcc"), name = "Connections", labels = c("Terrestrial-Freshwater", "Freshwater-Marine", "Terrestrial-Marine", "All")) +
+  theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "none")
+  
+ 
+
+
+world <- map_data('world')
+mp3 <- ggplot(world, aes(long, lat)) +
+  geom_map(map = world, aes(map_id = region), fill = "gray", color = "white") +
+  coord_quickmap()
+
+ecos2 <- mp3 + geom_scatterpie(aes(x = long, y = lat, r = radius), data = eco4, cols = c("ter_fre", "fre_mar", "ter_mar", "all")) +
+  annotate("text", x= -105, y = 73, size = 3.5, label = "North America", fontface = "bold") +
+  annotate("text", x= 15.5, y = 68, size = 3.5, label = "Europe", fontface = "bold") +
+  annotate("text", x= -57, y = -2, size = 3.5, label = "South America", fontface = "bold") +
+  annotate("text", x= 104, y = 69, size = 3.5, label = "Asia", fontface = "bold") +
+  annotate("text", x= 153, y = 23, size = 3.5, label = "Indo-Pacific", fontface = "bold") +
+  annotate("text", x= 23, y = 22, size = 3.5, label = "Africa", fontface = "bold") +
+  annotate("text", x= -10, y = -60, size = 3.5, label = "Antarctica", fontface = "bold") +
+  annotate("text", x= 15, y = 125, size = 3.5, label = "Cross-continent", fontface = "bold") +
+  annotate("text", x = -140, y = -15, size = 3.5, label = "Number of Articles") +
+  scale_fill_manual(values = c("#225ea8", "#41b6c4", "#a1dab4", "#ffffcc"), name = "Connections", labels = c("Terrestrial-Freshwater", "Freshwater-Marine", "Terrestrial-Marine", "All")) +
+  theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "none", legend.box = "horizontal") +
+  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
+  geom_scatterpie_legend(eco3$radius, x = -150, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
+  
+  
+ 
+fig2 <- ggarrange(ecos2, ecos1, ncol = 2, labels = "B", widths = c(5,1.25), heights = c(3,2), common.legend = TRUE, legend = "bottom")
+
+annotate_figure(fig2,
+               top = text_grob("Global Trends", face = "bold", size = 10, hjust = -2.5, vjust = 13))
+
+
+
+ggsave(file = "ecosystem_connection2.png", width = 7, height = 4.5, unit = "in", dpi = 700)
+```
+
+
+```{r}
+
+ggarrange(flows2, flows1, ncol = 2, labels = "A", widths = c(5,1.5), heights = c(3,2), common.legend = TRUE, legend = "bottom")
+
+ggarrange(ecos2, ecos1, ncol = 2, labels = "B", widths = c(5,1), heights = c(3,2), common.legend = TRUE, legend = "bottom")
+
+
+```
+
+
+
 world map of direct and indirect linkages
 ```{r}
 mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = link2, cols = c("direct", "indirect")) +
@@ -396,85 +499,6 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = link2, cols = c("
  geom_scatterpie_legend(link2$radius, x = -140, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))
 
 ggsave(file = "linkages.png", dpi = 700)
-
-```
-world map of ecosystem connections of direct linkage studies
-```{r}
-world <- map_data('world')
-mp3 <- ggplot(world, aes(long, lat)) +
-  geom_map(map = world, aes(map_id = region), fill = "gray", color = "white") +
-  coord_quickmap()
-
-mp3 + geom_scatterpie(aes(x = long, y = lat, r = radius), data = eco3, cols = c("ter_fre", "fre_mar", "ter_mar", "all")) +
-  annotate("text", x= -105, y = 73, size = 3.5, label = "North America", fontface = "bold") +
-  annotate("text", x= 15.5, y = 68, size = 3.5, label = "Europe", fontface = "bold") +
-  annotate("text", x= -57, y = -2, size = 3.5, label = "South America", fontface = "bold") +
-  annotate("text", x= 104, y = 69, size = 3.5, label = "Asia", fontface = "bold") +
-  annotate("text", x= 153, y = 23, size = 3.5, label = "Indo-Pacific", fontface = "bold") +
-  annotate("text", x= 23, y = 22, size = 3.5, label = "Africa", fontface = "bold") +
-  annotate("text", x= -10, y = -60, size = 3.5, label = "Antarctica", fontface = "bold") +
-  annotate("text", x= 161, y = 118, size = 3.5, label = "Cross-continent", fontface = "bold") +
-  annotate("text", x= 14, y = 138, size = 3.5, label = "Global Trends", fontface = "bold") +
-  annotate("text", x = -140, y = -15, size = 3.5, label = "Number of Articles") +
-  annotate("text", x = -170, y = 125, size = 4, label = "B)", fontface = "bold") +
-  scale_fill_manual(values = c("#2c7fb8", "#7fcdbb", "#edf8b1"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
-  theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "bottom", legend.box = "horizontal") +
-  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
-  scale_fill_manual(values = c("#225ea8", "#41b6c4", "#a1dab4", "#ffffcc"), name = "Ecosystem Connection", labels = c("Terrestrial-Freshwater", "Freshwater-Marine", "Terrestrial-Marine", "All")) +
-  geom_scatterpie_legend(eco3$radius, x = -150, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))+
-  annotate("rect", xmin= -31, xmax = 60, ymin = 82, ymax = 146, alpha = 0.2, color = "black", fill = NA)
-
-ggsave(file = "ecosystem_connection.png", width = 7, height = 4.5, unit = "in", dpi = 700)
-```
-
-Figure
-```{r}
-world <- map_data('world')
-mp2 <- ggplot(world, aes(long, lat)) +
-  geom_map(map = world, aes(map_id = region), fill = "gray", color = "white") +
-  coord_quickmap()
-
-flows <- mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba3, cols = c("abiotic", "biotic", "both")) +
-  annotate("text", x= -103, y = 74, size = 3.5, label = "North America", fontface = "bold") +
-  annotate("text", x= 15.5, y = 63, size = 3.5, label = "Europe", fontface = "bold") +
-  annotate("text", x= -58, y = -5, size = 3.5, label = "South America", fontface = "bold") +
-  annotate("text", x= 105, y = 68, size = 3.5, label = "Asia", fontface = "bold") +
-  annotate("text", x= 152, y = 23, size = 3.5, label = "Indo-Pacific", fontface = "bold") +
-  annotate("text", x= 20, y = 23, size = 3.5, label = "Africa", fontface = "bold") +
-  annotate("text", x= -10, y = -60, size = 3.5, label = "Antarctica", fontface = "bold") +
-  annotate("text", x= 160, y = 125, size = 3.5, label = "Cross-continent", fontface = "bold") +
-  annotate("text", x= 16, y = 150, size = 3.5, label = "Global Trends", fontface = "bold") +
-  annotate("text", x = -140, y = -18, size = 3.5, label = "Number of Articles") +
-  scale_fill_manual(values = c("#d01c8b", "#4dac26", "#f7f7f7"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
-  theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "bottom", legend.box = "horizontal") +
-  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
-  geom_scatterpie_legend(ba3$radius, x = -160, y = -53, n = 3, labeller = function(a) a = c("<14", "15-28", ">28")) + 
-  annotate("rect", xmin= -35, xmax = 65, ymin = 94, ymax = 158, alpha = 0.2, color = "black", fill = NA)
-
-ecos <- mp2 + geom_scatterpie(aes(x = long, y = lat, r = radius), data = eco3, cols = c("ter_fre", "fre_mar", "ter_mar", "all")) +
-  annotate("text", x= -105, y = 73, size = 3.5, label = "North America", fontface = "bold") +
-  annotate("text", x= 15.5, y = 68, size = 3.5, label = "Europe", fontface = "bold") +
-  annotate("text", x= -57, y = -2, size = 3.5, label = "South America", fontface = "bold") +
-  annotate("text", x= 104, y = 69, size = 3.5, label = "Asia", fontface = "bold") +
-  annotate("text", x= 153, y = 23, size = 3.5, label = "Indo-Pacific", fontface = "bold") +
-  annotate("text", x= 23, y = 22, size = 3.5, label = "Africa", fontface = "bold") +
-  annotate("text", x= -10, y = -60, size = 3.5, label = "Antarctica", fontface = "bold") +
-  annotate("text", x= 161, y = 118, size = 3.5, label = "Cross-continent", fontface = "bold") +
-  annotate("text", x= 14, y = 138, size = 3.5, label = "Global Trends", fontface = "bold") +
-  annotate("text", x = -140, y = -15, size = 3.5, label = "Number of Articles") +
-  scale_fill_manual(values = c("#2c7fb8", "#7fcdbb", "#edf8b1"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
-  theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "bottom", legend.box = "horizontal") +
-  guides(fill = guide_legend(title.position = "top", nrow = 2, title.hjust = 0.5)) +
-  scale_fill_manual(values = c("#225ea8", "#41b6c4", "#a1dab4", "#ffffcc"), name = "Ecosystem Connection", labels = c("Terrestrial-Freshwater", "Freshwater-Marine", "Terrestrial-Marine", "All")) +
-  geom_scatterpie_legend(eco3$radius, x = -150, y = -50, n = 3, labeller = function(a) a = c("<14", "15-28", ">28"))+
-  annotate("rect", xmin= -31, xmax = 60, ymin = 82, ymax = 146, alpha = 0.2, color = "black", fill = NA)
-
-figure <- ggarrange(flows, ecos,
-                    labels = c("A", "B"),
-                    ncol = 1, nrow = 2)
-
-
-
 
 ```
 
@@ -501,8 +525,5 @@ mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = term2, cols = c("
 
 ggsave("search_terms.png", dpi = 700)
 ```
-global change map
-```{r}
 
-```
 
