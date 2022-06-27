@@ -183,6 +183,7 @@ htspts2[htspts2 == "North Africa"] <- "Africa"
 htspts2[htspts2 == "South Africa"] <- "Africa"
 htspts2[htspts2 == "Aegean Sea"] <- "Europe"
 htspts2[htspts2 == "Australia"] <- "Australia"
+htspts2[htspts2 == "Arctic"] <- "North America"
 
 ##add long, lat columns##
 htspts2 <- htspts2 %>%
@@ -389,7 +390,7 @@ flows2 <- mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba4, co
   annotate("text", x= 152, y = 23, size = 3.5, label = "Indo-Pacific", fontface = "bold") +
   annotate("text", x= 20, y = 23, size = 3.5, label = "Africa", fontface = "bold") +
   annotate("text", x= -10, y = -60, size = 3.5, label = "Antarctica", fontface = "bold") +
-  annotate("text", x= 15, y = 125, size = 3.5, label = "Cross-continent", fontface = "bold") +
+  annotate("text", x= 15, y = 125, size = 3.5, label = "Global", fontface = "bold") +
   annotate("text", x = -140, y = -18, size = 3.5, label = "Number of Articles") +
   scale_fill_manual(values = c("#d01c8b", "#4dac26", "#f7f7f7"), name = "Flows", labels = c("Abiotic", "Biotic", "Both")) +
   theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "none", legend.box = "horizontal") +
@@ -400,7 +401,7 @@ flows2 <- mp2 + geom_scatterpie(aes(x = long, y = lat, r=radius), data = ba4, co
 fig1 <- ggarrange(flows2, flows1, ncol = 2, labels = "A", widths = c(5,1.25), heights = c(3,2), common.legend = TRUE, legend = "bottom")
 
 annotate_figure(fig1,
-               top = text_grob("Global Trends", face = "bold", size = 10, hjust = -2.5, vjust = 13))
+               top = text_grob("Overall Trends", face = "bold", size = 10, hjust = -2.4, vjust = 13))
 
 setwd("~/Land_Sea_linkages/GlobalHotspots")
 ggsave(file = "biotic_abiotic2.png", width = 7, height = 4.5, units = "in", dpi = 800)
@@ -450,7 +451,7 @@ ecos2 <- mp3 + geom_scatterpie(aes(x = long, y = lat, r = radius), data = eco4, 
   annotate("text", x= 153, y = 23, size = 3.5, label = "Indo-Pacific", fontface = "bold") +
   annotate("text", x= 23, y = 22, size = 3.5, label = "Africa", fontface = "bold") +
   annotate("text", x= -10, y = -60, size = 3.5, label = "Antarctica", fontface = "bold") +
-  annotate("text", x= 15, y = 125, size = 3.5, label = "Cross-continent", fontface = "bold") +
+  annotate("text", x= 15, y = 125, size = 3.5, label = "Global", fontface = "bold") +
   annotate("text", x = -140, y = -15, size = 3.5, label = "Number of Articles") +
   scale_fill_manual(values = c("#225ea8", "#41b6c4", "#a1dab4", "#ffffcc"), name = "Connections", labels = c("Terrestrial-Freshwater", "Freshwater-Marine", "Terrestrial-Marine", "All")) +
   theme(panel.background = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank(), axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "none", legend.box = "horizontal") +
@@ -462,7 +463,7 @@ ecos2 <- mp3 + geom_scatterpie(aes(x = long, y = lat, r = radius), data = eco4, 
 fig2 <- ggarrange(ecos2, ecos1, ncol = 2, labels = "B", widths = c(5,1.25), heights = c(3,2), common.legend = TRUE, legend = "bottom")
 
 annotate_figure(fig2,
-               top = text_grob("Global Trends", face = "bold", size = 10, hjust = -2.5, vjust = 13))
+               top = text_grob("Overall Trends", face = "bold", size = 10, hjust = -2.4, vjust = 13))
 
 
 
